@@ -1,0 +1,46 @@
+{
+  "service": {
+    "name": "billing-api",
+    "version": "1.4.2",
+    "debug": false,
+    "timeout_seconds": 30,
+    "retries": {
+      "max_attempts": 3,
+      "backoff": {
+        "initial_ms": 100,
+        "multiplier": 2.0,
+        "max_ms": 5000
+      },
+      "retry_on": [429, 502, 503, 504]
+    }
+  },
+  "database": {
+    "host": "db.internal",
+    "port": 5432,
+    "name": "billing",
+    "pool": {
+      "min_size": 2,
+      "max_size": 20,
+      "idle_timeout_seconds": 300
+    },
+    "replicas": [
+      { "host": "db-replica-1.internal", "port": 5432 },
+      { "host": "db-replica-2.internal", "port": 5432 }
+    ]
+  },
+  "features": {
+    "new_checkout": true,
+    "beta_pricing": false
+  },
+  "logging": {
+    "level": "INFO",
+    "sinks": [
+      { "type": "stdout", "format": "json" },
+      { "type": "file", "path": "/var/log/billing.log", "rotate_mb": 100 }
+    ]
+  },
+  "maintenance": {
+    "enabled": false,
+    "window": null
+  }
+}
