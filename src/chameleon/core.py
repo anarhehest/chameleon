@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 from copy import deepcopy as _deepcopy
 
@@ -77,15 +79,11 @@ class Chameleon(dict):
 
         try:
             for key in keys[:-1]:
-                if not isinstance(node, dict):
-                    raise TypeError(
-                        f"path {path!r} crosses non-mapping at {key!r} ({type(node).__name__})"
-                    )
                 if key in node:
                     child = node[key]
                     if not isinstance(child, dict):
                         raise TypeError(
-                            f"path {path!r} crosses non-mapping at {key!r} ({type(node).__name__})"
+                            f"path {path!r} crosses non-mapping at {key!r} ({type(child).__name__})"
                         )
                     node = child
                     continue
@@ -107,13 +105,13 @@ class Chameleon(dict):
                     node.pop(last, None)
         finally:
             for parent, key in reversed(created):
-                child = parent[key]
+                child = parent.get(key)
                 if isinstance(child, Chameleon) and not child:
                     del parent[key]
 
     def to_dict(self):
         def convert(v):
-            if isinstance(v, Chameleon) or isinstance(v, dict):
+            if isinstance(v, dict):
                 return {k: convert(x) for k, x in v.items()}
             if isinstance(v, list):
                 return [convert(x) for x in v]
@@ -131,7 +129,7 @@ class Chameleon(dict):
 
     def __deepcopy__(self, memo):
         cls = type(self)
-        new = cls(strict=self.__dict__.get("_strict", False))
+        new = cls(strict=self._strict)
         memo[id(self)] = new
         for k, v in self.items():
             new[_deepcopy(k, memo)] = _deepcopy(v, memo)

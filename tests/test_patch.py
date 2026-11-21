@@ -104,3 +104,11 @@ def test_patch_invalid_path_does_not_mutate():
         with c.patch("", 1):
             pass
     assert c == {}
+
+
+def test_patch_tolerates_deleted_intermediate():
+    c = Chameleon()
+    with c.patch("a.b", 1):
+        assert c.a.b == 1
+        del c.a
+    assert c == {}
